@@ -30,6 +30,7 @@ const (
 	defaultZkRoot        = "/hbase"
 	defaultZkTimeout     = 30 * time.Second
 	defaultEffectiveUser = "root"
+	defaultAuth          = "SIMPLE"
 )
 
 // Client a regular HBase client
@@ -104,6 +105,7 @@ type client struct {
 		*slog.Logger) hrpc.RegionClient
 
 	compressionCodec compression.Codec
+	auth string
 
 	// zkDialer is used in the zkClient to connect to the quorum
 	zkDialer func(ctx context.Context, network, addr string) (net.Conn, error)
@@ -139,6 +141,7 @@ func newClient(zkquorum string, options ...Option) *client {
 		done:                make(chan struct{}),
 		newRegionClientFn:   region.NewClient,
 		logger:              slog.Default(),
+		auth:                defaultAuth,
 	}
 	for _, option := range options {
 		option(c)
@@ -267,6 +270,13 @@ func RegionReadTimeout(to time.Duration) Option {
 func EffectiveUser(user string) Option {
 	return func(c *client) {
 		c.effectiveUser = user
+	}
+}
+
+// Auth will return an option that will set the authorization method when accessing regions
+func Auth(auth string) Option {
+	return func(c *client) {
+		c.auth = auth
 	}
 }
 

@@ -23,7 +23,7 @@ import (
 func NewClient(addr string, ctype ClientType, queueSize int, flushInterval time.Duration,
 	effectiveUser string, readTimeout time.Duration, codec compression.Codec,
 	dialer func(ctx context.Context, network, addr string) (net.Conn, error),
-	slogger *slog.Logger) hrpc.RegionClient {
+	slogger *slog.Logger, auth string) hrpc.RegionClient {
 	c := &client{
 		addr:          addr,
 		ctype:         ctype,
@@ -35,6 +35,7 @@ func NewClient(addr string, ctype ClientType, queueSize int, flushInterval time.
 		done:          make(chan struct{}),
 		sent:          make(map[uint32]hrpc.Call),
 		logger:        slogger,
+		auth:          auth,
 	}
 
 	if codec != nil {
